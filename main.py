@@ -4,12 +4,13 @@ import time
 import random
 import statistics
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import os
 
 #===========================================================================================================#
 #===[    CONFIGURAÇÕES    ]=================================================================================#
 #===========================================================================================================#
-NUM_FILOSOFOS = 5               # numero de filosofos
+NUM_FILOSOFOS = 5               # número de filósofos
 TEMPO_SIMULACAO = 15.0          # segundos que a simulação vai rodar
 TAXA_PENSAR = 1.0               # taxa exponencial pra tempo de pensar
 TAXA_COMER = 1.5                # taxa exponencial pra tempo de comer
@@ -43,6 +44,27 @@ def log(frame, stats, medias, arquivo=ARQUIVO_LOG):
             a.write(f"  Filósofo {i}: refeições={stats['refeicoes'][i]}, tempo médio de espera={medias[i]}s\n")
         a.write("\n#" + "="*84 + "#\n\n")
 
+def log_analise_final(stats, arquivo=ARQUIVO_LOG):
+    medias_espera = [
+        round(statistics.mean(w), 3) if len(w) > 0 else 0
+        for w in stats['tempos_espera']
+    ]
+    tempos_max_espera = [
+        round(max(w), 3) if len(w) > 0 else 0
+        for w in stats['tempos_espera']
+    ]
+    total_refeicoes = stats['refeicoes']
+    starvation = [i for i, r in enumerate(total_refeicoes) if r <= min(total_refeicoes)]
+
+    with open(arquivo, 'a') as a:
+        a.write("\n#==============================[    ANÁLISE FINAL    ]===============================#\n")
+        for i in range(NUM_FILOSOFOS):
+            a.write(f"Filósofo {i}: refeições={total_refeicoes[i]}, "
+                    f"tempo médio={medias_espera[i]}s, tempo máximo={tempos_max_espera[i]}s\n")
+        if starvation:
+            a.write(f"Possível starvation nos filósofos: {starvation}\n")
+        a.write("\n#" + "="*84 + "#\n\n")
+
 #===========================================================================================================#
 #===[    FILÓSOFOS    ]=====================================================================================#
 #===========================================================================================================#
@@ -64,6 +86,73 @@ def filosofar(id_filo, garfo_esq, garfo_dir, stats, parar):
 
         garfo_dir.release()
         garfo_esq.release()
+
+#===========================================================================================================#
+#===[    ANÁLISE FINAL    ]=================================================================================#
+#===========================================================================================================#
+def analise_final(stats):
+    medias_espera = [
+        round(statistics.mean(w), 3) if len(w) > 0 else 0
+        for w in stats['tempos_espera']
+    ]
+    tempos_max_espera = [
+        round(max(w), 3) if len(w) > 0 else 0
+        for w in stats['tempos_espera']
+    ]
+    total_refeicoes = stats['refeicoes']
+    starvation = [i for i, r in enumerate(total_refeicoes) if r <= min(total_refeicoes)]
+
+    print("\n=== ANÁLISE FINAL ===")
+    for i in range(NUM_FILOSOFOS):
+        print(f"Filósofo {i}: refeições={total_refeicoes[i]}, "
+              f"tempo médio={medias_espera[i]}s, tempo máximo={tempos_max_espera[i]}s")
+    if starvation:
+        print(f"Possível starvation nos filósofos: {starvation}")
+    print("====================\n")
+
+    plt.figure(figsize=(10,5))
+    plt.grid(axis='y', linestyle='--', alpha=0.5)
+    plt.bar(range(NUM_FILOSOFOS), total_refeicoes,
+            color=['red' if i in starvation else 'teal' for i in range(NUM_FILOSOFOS)],
+            alpha=0.7, label='Refeições')
+    plt.plot(range(NUM_FILOSOFOS), medias_espera, color='orange', marker='o', label='Tempo médio espera (s)')
+    plt.plot(range(NUM_FILOSOFOS), tempos_max_espera, color='purple', marker='x', linestyle='--', label='Tempo máximo espera (s)')
+    plt.xticks(range(NUM_FILOSOFOS), [f"Filósofo {i}" for i in range(NUM_FILOSOFOS)])
+    plt.ylabel("Refeições / Tempo (s)")
+    plt.title("Análise Final (Jantar dos Filósofos)")
+    plt.legend()
+
+    normal_patch = mpatches.Patch(color='teal', label='Refeições normais')
+    starvation_patch = mpatches.Patch(color='red', label='Possível starvation')
+
+    plt.legend(
+        handles=[
+            normal_patch,
+            starvation_patch,
+            plt.Line2D(
+                [],
+                [],
+                color='orange',
+                marker='o',
+                label='Tempo médio espera (s)'
+            ),
+            plt.Line2D(
+                [],
+                [],
+                color='purple',
+                marker='x',
+                linestyle='--',
+                label='Tempo máximo espera (s)'
+            )
+        ]
+    )
+
+    plt.tight_layout()
+
+    arquivo_final = os.path.join(PASTA_FRAMES, "analise_final.png")
+    plt.savefig(arquivo_final)
+    plt.close()
+    print(f"Gráfico final salvo em: {arquivo_final}")
 
 #===========================================================================================================#
 #===[    SIMULAÇÃO    ]=====================================================================================#
@@ -94,7 +183,7 @@ def simular_e_salvar_frames():
         plt.bar(range(NUM_FILOSOFOS), stats['refeicoes'], color='teal')
         plt.xticks(range(NUM_FILOSOFOS), [f"Filósofo {i}" for i in range(NUM_FILOSOFOS)])
         plt.ylabel("Quantidade de refeições")
-        plt.title(f"Simulação Jantar dos Filósofos - frame {frame:03d}")
+        plt.title(f"Simulação (Jantar dos Filósofos) | Frame {frame:03d}")
         plt.tight_layout()
 
         arquivo = os.path.join(PASTA_FRAMES, f"{frame:03d}.png")
@@ -118,6 +207,9 @@ def simular_e_salvar_frames():
     parar.set()
     for t in threads:
         t.join(timeout=0.5)
+
+    analise_final(stats)
+    log_analise_final(stats)
 
 #===========================================================================================================#
 #===[    RUN    ]===========================================================================================#
