@@ -15,14 +15,17 @@ TEMPO_SIMULACAO = 15.0          # segundos que a simulação vai rodar
 TAXA_PENSAR = 1.0               # taxa exponencial pra tempo de pensar
 TAXA_COMER = 1.5                # taxa exponencial pra tempo de comer
 INTERVALO_SALVAR = 0.5          # intervalo pra salvar frames (segundos)
-ARQUIVO_LOG = "log.txt"         # arquivo de logs
 PASTA_FRAMES = "frames"         # pasta salvamento das imagens
+PASTA_LOGS = "logs"             # pasta para os arquivos de log
 
 os.makedirs(PASTA_FRAMES, exist_ok=True)
-
-subpasta = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-PASTA_FRAMES = os.path.join(PASTA_FRAMES, subpasta)
+subpasta_frames = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+PASTA_FRAMES = os.path.join(PASTA_FRAMES, subpasta_frames)
 os.makedirs(PASTA_FRAMES, exist_ok=True)
+
+os.makedirs(PASTA_LOGS, exist_ok=True)
+nome_log = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".log"
+ARQUIVO_LOG = os.path.join(PASTA_LOGS, nome_log)
 
 #===========================================================================================================#
 #===[    LOGS  ]============================================================================================#
@@ -114,38 +117,21 @@ def analise_final(stats):
     plt.grid(axis='y', linestyle='--', alpha=0.5)
     plt.bar(range(NUM_FILOSOFOS), total_refeicoes,
             color=['red' if i in starvation else 'teal' for i in range(NUM_FILOSOFOS)],
-            alpha=0.7, label='Refeições')
+            alpha=0.7)
     plt.plot(range(NUM_FILOSOFOS), medias_espera, color='orange', marker='o', label='Tempo médio espera (s)')
     plt.plot(range(NUM_FILOSOFOS), tempos_max_espera, color='purple', marker='x', linestyle='--', label='Tempo máximo espera (s)')
     plt.xticks(range(NUM_FILOSOFOS), [f"Filósofo {i}" for i in range(NUM_FILOSOFOS)])
     plt.ylabel("Refeições / Tempo (s)")
     plt.title("Análise Final (Jantar dos Filósofos)")
-    plt.legend()
 
     normal_patch = mpatches.Patch(color='teal', label='Refeições normais')
     starvation_patch = mpatches.Patch(color='red', label='Possível starvation')
-
-    plt.legend(
-        handles=[
-            normal_patch,
-            starvation_patch,
-            plt.Line2D(
-                [],
-                [],
-                color='orange',
-                marker='o',
-                label='Tempo médio espera (s)'
-            ),
-            plt.Line2D(
-                [],
-                [],
-                color='purple',
-                marker='x',
-                linestyle='--',
-                label='Tempo máximo espera (s)'
-            )
-        ]
-    )
+    plt.legend(handles=[
+        normal_patch,
+        starvation_patch,
+        plt.Line2D([], [], color='orange', marker='o', label='Tempo médio espera (s)'),
+        plt.Line2D([], [], color='purple', marker='x', linestyle='--', label='Tempo máximo espera (s)')
+    ])
 
     plt.tight_layout()
 

@@ -33,8 +33,6 @@ venv.bak/
 .DS_Store
 Thumbs.db
 
-frames/
-output/
 dist/
 build/
 *.egg-info/

@@ -28,7 +28,9 @@ A implementação foi feita em **Python**, utilizando:
 ```
 jantar-filosofos/
 ├── frames/                  # Pasta onde são salvos os gráficos (frames)
-├── log.txt                  # Arquivo de logs da simulação
+│   └── .gitkeep             # Arquivo para garantir que a pasta seja versionada mesmo vazia
+├── logs/                    # Pasta onde são salvos os logs da simulação
+│   └── .gitkeep             # Arquivo para garantir que a pasta seja versionada mesmo vazia
 └── main.py                  # Código principal da simulação
 ```
 
