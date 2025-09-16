@@ -21,7 +21,7 @@ A implementação foi feita em **Python**, utilizando:
 - **threading**: para simular os filósofos como threads concorrentes;
 - **Locks (mutex)**: para representar os garfos e garantir exclusão mútua;
 - **Matplotlib**: para geração dos gráficos de cada “frame”;
-- Sistema de logs: para registrar as estatísticas em cada execução.
+- **Sistema de logs**: para registrar as estatísticas em cada execução.
 
 ### 3.1 Estrutura do Projeto
 
