@@ -129,8 +129,6 @@ python main.py
 ## 8. Referências
 
 - Dijkstra, E. W. (1965). *Solution of a problem in concurrent programming control.*
-- Tanenbaum, A. S. *Modern Operating Systems.*
-- Stallings, W. *Operating Systems: Internals and Design Principles.*
 
 ---
 ## 9. Licença
